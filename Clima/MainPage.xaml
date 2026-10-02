@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Clima.ViewModels"
+             x:Class="Clima.MainPage"
+             BackgroundColor="#121824">
+
+    <ContentPage.BindingContext>
+        <viewmodels:WeatherViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="24">
+
+        <!-- Encabezado -->
+        <VerticalStackLayout Grid.Row="0" Spacing="4" Margin="0,20,0,10">
+            <Label Text="CLIMA EN VIVO"
+                   TextColor="#7E8B9B"
+                   FontSize="12"
+                   FontAttributes="Bold"
+                   CharacterSpacing="2"
+                   HorizontalOptions="Center" />
+            <Label Text="{Binding CurrentWeather.City}"
+                   TextColor="White"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <!-- Contenedor Central: Estados de Carga y Tarjeta -->
+        <Grid Grid.Row="1" VerticalOptions="Center">
+
+            <!-- Estado: Cargando (Spinner e indicador) -->
+            <VerticalStackLayout x:Name="LoadingContainer"
+                                 Spacing="16"
+                                 Opacity="0"
+                                 IsVisible="False"
+                                 HorizontalOptions="Center">
+                <Label x:Name="SpinnerIcon"
+                       Text="🔄"
+                       FontSize="48"
+                       HorizontalOptions="Center" />
+                <Label Text="{Binding LoadingMessage}"
+                       TextColor="#A0AEC0"
+                       FontSize="15"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Estado: Tarjeta Principal del Clima -->
+            <Border x:Name="WeatherCard"
+                    StrokeThickness="0"
+                    Background="{Binding CurrentWeather.BackgroundColor}"
+                    Padding="24"
+                    HorizontalOptions="Fill">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="28" />
+                </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,10"
+                            Radius="25"
+                            Opacity="0.3" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                    <Label Text="{Binding CurrentWeather.Icon}"
+                           FontSize="72"
+                           HorizontalOptions="Center" />
+
+                    <Label Text="{Binding CurrentWeather.Temperature}"
+                           TextColor="White"
+                           FontSize="64"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center" />
+
+                    <Label Text="{Binding CurrentWeather.Condition}"
+                           TextColor="#E2E8F0"
+                           FontSize="18"
+                           HorizontalOptions="Center" />
+
+                    <!-- Métricas Adicionales -->
+                    <BoxView HeightRequest="1" Color="#4A5568" Margin="0,10" />
+
+                    <Grid ColumnDefinitions="*, *" WidthRequest="220">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Humedad" TextColor="#CBD5E0" FontSize="12" HorizontalOptions="Center"/>
+                            <Label Text="{Binding CurrentWeather.Humidity}" TextColor="White" FontAttributes="Bold" FontSize="15" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Viento" TextColor="#CBD5E0" FontSize="12" HorizontalOptions="Center"/>
+                            <Label Text="{Binding CurrentWeather.WindSpeed}" TextColor="White" FontAttributes="Bold" FontSize="15" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- Botón de Actualizar / Cambiar Ciudad -->
+        <Button x:Name="RefreshButton"
+                Grid.Row="2"
+                Text="Actualizar Pronóstico"
+                Clicked="OnRefreshClicked"
+                BackgroundColor="#3182CE"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="24"
+                HeightRequest="52"
+                Margin="0,0,0,20" />
+    </Grid>
+</ContentPage>
