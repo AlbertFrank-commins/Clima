@@ -2,45 +2,23 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Clima.Models;
+using Clima.Services;
 
 namespace Clima.ViewModels;
 
 public class WeatherViewModel : INotifyPropertyChanged
 {
+    private readonly WeatherService _weatherService = new();
     private int _cityIndex = 0;
 
-    private readonly List<WeatherData> _mockData = new()
+    // Ciudades con sus coordenadas reales (latitud, longitud)
+    private readonly List<(string City, double Lat, double Lon)> _cities = new()
     {
-        new WeatherData
-        {
-            City = "Santo Domingo",
-            Temperature = "29°C",
-            Condition = "Parcialmente Nublado",
-            Icon = "⛅",
-            Humidity = "78%",
-            WindSpeed = "18 km/h",
-            BackgroundColor = Color.FromArgb("#2C3E50")
-        },
-        new WeatherData
-        {
-            City = "La Romana",
-            Temperature = "31°C",
-            Condition = "Soleado y Caluroso",
-            Icon = "☀️",
-            Humidity = "65%",
-            WindSpeed = "14 km/h",
-            BackgroundColor = Color.FromArgb("#E67E22")
-        },
-        new WeatherData
-        {
-            City = "Constanza",
-            Temperature = "16°C",
-            Condition = "Lluvia Ligera",
-            Icon = "🌧️",
-            Humidity = "90%",
-            WindSpeed = "8 km/h",
-            BackgroundColor = Color.FromArgb("#34495E")
-        }
+        ("Santo Domingo", 18.4861, -69.9312),
+        ("La Romana", 18.4273, -68.9728),
+        ("Punta Cana", 18.5820, -68.4055),
+        ("Santiago de los Caballeros", 19.4517, -70.6970),
+        ("Constanza", 18.9092, -70.7449)
     };
 
     private WeatherData? _currentWeather;
@@ -57,7 +35,7 @@ public class WeatherViewModel : INotifyPropertyChanged
         set => SetProperty(ref _isLoading, value);
     }
 
-    private string _loadingMessage = "Consultando satélite...";
+    private string _loadingMessage = "Consultando Open-Meteo...";
     public string LoadingMessage
     {
         get => _loadingMessage;
@@ -68,8 +46,14 @@ public class WeatherViewModel : INotifyPropertyChanged
 
     public WeatherViewModel()
     {
-        CurrentWeather = _mockData[0];
         RefreshWeatherCommand = new Command(async () => await RefreshWeatherAsync());
+
+        // Carga inicial al arrancar
+        Task.Run(async () =>
+        {
+            var initial = _cities[0];
+            CurrentWeather = await _weatherService.GetWeatherByCoordinatesAsync(initial.City, initial.Lat, initial.Lon);
+        });
     }
 
     public async Task RefreshWeatherAsync()
@@ -77,13 +61,13 @@ public class WeatherViewModel : INotifyPropertyChanged
         if (IsLoading) return;
 
         IsLoading = true;
-        LoadingMessage = "Sincronizando pronóstico...";
+        LoadingMessage = "Obteniendo datos satelitales en vivo...";
 
-        // Simulación de latencia de red (2 segundos)
-        await Task.Delay(2000);
+        _cityIndex = (_cityIndex + 1) % _cities.Count;
+        var target = _cities[_cityIndex];
 
-        _cityIndex = (_cityIndex + 1) % _mockData.Count;
-        CurrentWeather = _mockData[_cityIndex];
+        // Consulta HTTP real a la API
+        CurrentWeather = await _weatherService.GetWeatherByCoordinatesAsync(target.City, target.Lat, target.Lon);
 
         IsLoading = false;
     }
