@@ -1,6 +1,6 @@
 ﻿using Clima.ViewModels;
 
-namespace Clima;
+namespace Clima.Views;
 
 public partial class MainPage : ContentPage
 {
